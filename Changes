@@ -1,5 +1,14 @@
 Revision history for Text-WideChar-Util
 
+0.02    2013-04-09 (SHARYANTO)
+
+        [BUG FIXES]
+
+        - mbpad(): Since mbtrunc() can generate text with width ($width-1) or
+        even less, depending on the width of truncated wide character, we need
+        to pad again to get to $width.
+
+
 0.01    2013-04-09 (SHARYANTO)
 
         First release.

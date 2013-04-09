@@ -86,6 +86,7 @@ subtest "mbpad" => sub {
     is(mbpad("你好吗", 10, "r", "x"), "你好吗xxxx", "padchar");
     is(mbpad("你好吗12345678", 10),   "你好吗12345678", "trunc=0");
     is(mbpad("你好吗12345678", 10, undef, undef, 1), "你好吗1234", "trunc=1");
+    is(mbpad("你好吗", 3, undef, undef, 1), "你 ", "trunc=1 repadded");
 };
 
 subtest "mbtrunc" => sub {

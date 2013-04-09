@@ -107,7 +107,8 @@ sub mbpad {
 
     my $w = mbswidth($text);
     if ($is_trunc && $w > $width) {
-        $text = mbtrunc($text, $width);
+        my $res = mbtrunc($text, $width, 1);
+        $text = $res->[0] . ($padchar x ($width-$res->[1]));
     } else {
         if ($which eq 'l') {
             $text = ($padchar x ($width-$w)) . $text;

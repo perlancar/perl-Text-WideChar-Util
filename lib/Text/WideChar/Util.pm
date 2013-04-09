@@ -105,53 +105,55 @@ sub mbpad {
     }
     $padchar //= " ";
 
-    # XXX is this safe? no newline inside ansi code sequence, right?
-    my @in = split /(\r?\n)/, $text;
-    my @out;
-
-    while (my ($line, $nl) = splice @in, 0, 2) {
-        my $w = mbswidth($line);
-        if ($is_trunc && $w > $width) {
-            $line = mbtrunc($line, $width);
+    my $w = mbswidth($text);
+    if ($is_trunc && $w > $width) {
+        $text = mbtrunc($text, $width);
+    } else {
+        if ($which eq 'l') {
+            $text = ($padchar x ($width-$w)) . $text;
+        } elsif ($which eq 'c') {
+            my $n = int(($width-$w)/2);
+            $text = ($padchar x $n) . $text . ($padchar x ($width-$w-$n));
         } else {
-            if ($which eq 'l') {
-                $line = ($padchar x ($width-$w)) . $line;
-            } elsif ($which eq 'c') {
-                my $n = int(($width-$w)/2);
-                $line = ($padchar x $n) . $line . ($padchar x ($width-$w-$n));
-            } else {
-                $line .= ($padchar x ($width-$w));
-            }
+            $text .= ($padchar x ($width-$w));
         }
-        push @out, $line;
-        push @out, $nl if defined $nl;
     }
-    join "", @out;
+    $text;
 }
 
 sub mbtrunc {
-    my ($text, $width) = @_;
+    my ($text, $width, $return_width) = @_;
 
     my $w = mbswidth($text);
+    die "Invalid argument, width must not be negative" unless $width >= 0;
     return $text if $w <= $width;
-    my @p = ta_split_codes($text);
+
+    # perform binary cutting
     my @res;
-    my $append = 1; # whether we should add more text
-    $w = 0;
-    while (my ($t, $ansi) = splice @p, 0, 2) {
-        if ($append) {
-            my $tw = mbswidth($t);
-            $w += $tw;
-            if ($w < $width) {
-                push @res, $t;
-            } else {
-                push @res, substr($t, 0, $tw-($w-$width));
-                $append = 0;
-            }
+    my $wres = 0; # total width of text in @res
+    my $l = int($w/2); $l = 1 if $l == 0;
+    my $end;
+    while (1) {
+        my $left  = substr($text, 0, $l);
+        my $right = substr($text, $l);
+        my $wl = mbswidth($left);
+        #say "D: left=$left, right=$right, wl=$wl";
+        if ($wres + $wl > $width) {
+            $text = $left;
+        } else {
+            push @res, $left;
+            $wres += $wl;
+            $text = $right;
         }
-        push @res, $ansi if defined($ansi);
+        $l = int(($l+1)/2);
+        last if $l==1 && $end;
+        $end++ if $l==1;
     }
-    join("", @res);
+    if ($return_width) {
+        return [join("", @res), $wres];
+    } else {
+        return join("", @res);
+    }
 }
 
 1;
@@ -174,7 +176,9 @@ sub mbtrunc {
  say mbpad("foo\nbarbaz\n", 10, "center", "."); # => "...foo....\n..barbaz..\n"
 
  # truncate text to a certain column width
- say mbtrunc("红色", 2); # => "红"
+ say mbtrunc("红色", 2 ); # => "红"
+ say mbtrunc("红色", 3 ); # => "红"
+ say mbtrunc("红red", 3); # => "红r"
 
 
 =head1 DESCRIPTION

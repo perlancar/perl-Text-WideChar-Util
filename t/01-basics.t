@@ -77,24 +77,28 @@ subtest "mbwrap" => sub {
     is(mbwrap($txt2 , 40), $txt2w );
 };
 
+subtest "mbpad" => sub {
+    my $foo = "你好吗";
+    is(mbpad("",       10),           "          ", "empty");
+    is(mbpad("你好吗", 10),           "你好吗    ", "rpad");
+    is(mbpad("你好吗", 10, "l"),      "    你好吗", "lpad");
+    is(mbpad("你好吗", 10, "c"),      "  你好吗  ", "centerpad");
+    is(mbpad("你好吗", 10, "r", "x"), "你好吗xxxx", "padchar");
+    is(mbpad("你好吗12345678", 10),   "你好吗12345678", "trunc=0");
+    is(mbpad("你好吗12345678", 10, undef, undef, 1), "你好吗1234", "trunc=1");
+};
+
 subtest "mbtrunc" => sub {
-    my $t = "\x1b[31m1\x1b[32m2\x1b[33m3\x1b[0m4";
-    is(ta_trunc($t, 5), $t);
-    is(ta_trunc($t, 4), $t);
-    is(ta_trunc($t, 3), "\x1b[31m1\x1b[32m2\x1b[33m3\x1b[0m");
-    is(ta_trunc($t, 2), "\x1b[31m1\x1b[32m2\x1b[33m\x1b[0m");
-    is(ta_trunc($t, 1), "\x1b[31m1\x1b[32m\x1b[33m\x1b[0m");
-    is(ta_trunc($t, 0), "\x1b[31m\x1b[32m\x1b[33m\x1b[0m");
-    is(ta_mbtrunc($t, 9), $t);
-    is(ta_mbtrunc($t, 8), $t);
-    is(ta_mbtrunc($t, 7), "\x1b[31m不\x1b[32m用\x1b[33m陪\x1b[0m我"); # well, ...
-    is(ta_mbtrunc($t, 6), "\x1b[31m不\x1b[32m用\x1b[33m陪\x1b[0m");
-    is(ta_mbtrunc($t, 5), "\x1b[31m不\x1b[32m用\x1b[33m陪\x1b[0m"); # well, ...
-    is(ta_mbtrunc($t, 4), "\x1b[31m不\x1b[32m用\x1b[33m\x1b[0m");
-    is(ta_mbtrunc($t, 3), "\x1b[31m不\x1b[32m用\x1b[33m\x1b[0m"); # well, ...
-    is(ta_mbtrunc($t, 2), "\x1b[31m不\x1b[32m\x1b[33m\x1b[0m");
-    is(ta_mbtrunc($t, 1), "\x1b[31m不\x1b[32m\x1b[33m\x1b[0m"); # well, ...
-    is(ta_mbtrunc($t, 0), "\x1b[31m\x1b[32m\x1b[33m\x1b[0m");
+    is(mbtrunc("我不想",  0), "");
+    is(mbtrunc("我不想",  1), "");
+    is(mbtrunc("我不想",  2), "我");
+    is(mbtrunc("我不想",  3), "我");
+    is(mbtrunc("我wo"  ,  3), "我w");
+    is(mbtrunc("我wo"  ,  4), "我wo");
+    is(mbtrunc("我不想",  4), "我不");
+    is(mbtrunc("我不想",  5), "我不");
+    is(mbtrunc("我不想",  6), "我不想");
+    is(mbtrunc("我不想", 10), "我不想");
 };
 
 DONE_TESTING:

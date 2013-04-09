@@ -201,7 +201,7 @@ Wrap text to a specified column width.
 
 C<$width> defaults to 80 if not specified.
 
-Note: currently performance is rather abysmal (~ 1200/s on my Core i5-2400
+Note: currently performance is rather abysmal (~ 1500/s on my Core i5-2400
 3.1GHz desktop for a ~ 1KB of text), so call this routine sparingly ;-).
 
 =head2 mbwrap($text, $width) => STR

@@ -16,6 +16,7 @@ our @EXPORT_OK = qw(
                        mbswidth_height
                        mbtrunc
                        mbwrap
+                       wrap
                );
 
 # VERSION
@@ -35,12 +36,30 @@ sub mbswidth_height {
     [max(@lens) // 0, $num_lines];
 }
 
-sub mbwrap {
-    my ($text, $width) = @_;
+sub _wrap {
+    my ($is_mb, $text, $width, $opts) = @_;
     $width //= 80;
+    $opts  //= {};
+
+    my $fltab = $opts->{fltab};
+    if (!defined($fltab)) {
+        ($fltab) = $text =~ /^([ \t]*)\S/;
+        $fltab //= "";
+    }
+    if (!defined($sltab)) {
+        ($sltab) = $text =~ /^[^\n]*\S[\n]*^([ \t+]*)\S/;
+        $sltab //= "";
+    }
+    say "D:fltab=[$fltab], sltab=[$sltab]";
 
     my @res;
-    my @p = split /(\s+)/i, $text;
+
+    # to wrap, first we
+
+    my @ch = split /(\s+)/i, $text;
+
+                my @p;
+
     my $col = 0;
     my $i = 0;
     while (my $p = shift(@p)) {
@@ -94,6 +113,14 @@ sub mbwrap {
         }
     }
     join "", @res;
+}
+
+sub mbwrap {
+    _wrap(1, @_);
+}
+
+sub wrap {
+    _wrap(0, @_);
 }
 
 sub mbpad {
@@ -160,10 +187,12 @@ sub mbtrunc {
 1;
 # ABSTRACT: Routines for text containing wide characters
 
+=encoding utf8
+
 =head1 SYNOPSIS
 
  use Text::WideChar::Util qw(
-     mbpad mbswidth_height mbtrunc mbwrap);
+     mbpad mbswidth_height mbtrunc mbwrap wrap);
 
  # get width as well as number of lines
  say mbswidth_height("red\n红色"); # => [4, 2]
@@ -204,7 +233,7 @@ C<$width> defaults to 80 if not specified.
 Note: currently performance is rather abysmal (~ 1500/s on my Core i5-2400
 3.1GHz desktop for a ~ 1KB of text), so call this routine sparingly ;-).
 
-=head2 mbwrap($text, $width) => STR
+=head2 mbwrap($text, $width, \%opts) => STR
 
 Wrap C<$text> to C<$width> columns. It uses mbswidth() instead of Perl's
 length() which works on a per-character basis.
@@ -213,6 +242,31 @@ Note: for text which does not have whitespaces between words, like Chinese, you
 will have to separate the words first (e.g. using L<Lingua::ZH::WordSegmenter>).
 The module also currently does not handle whitespace-like characters other than
 ASCII 32 (for example, the Chinese dot 。).
+
+Options:
+
+=over
+
+=item * tab_width => INT (default: 8)
+
+=item * fltab => STR
+
+First line indent. If unspecified, will be deduced from the first line of text.
+
+=item * sltab => STD
+
+Subsequent line indent. If unspecified, will be deduced from the second line of
+text, or if unavailable, will default to empty string (C<"">).
+
+=back
+
+=head2 wrap($text, $width, \%opts) => STR
+
+Like mbwrap(), but uses character-based length() instead of column width-wise
+mbswidth(). Provided as an alternative to the venerable L<Text::Wrap>'s wrap()
+but with a different behaviour. This module's wrap() can reflow newline and its
+behavior is more akin to Emacs (try reflowing a paragraph in Emacs using
+C<M-q>).
 
 =head2 mbpad($text, $width[, $which[, $padchar[, $truncate]]]) => STR
 

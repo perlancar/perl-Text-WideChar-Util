@@ -1,5 +1,13 @@
 Revision history for Text-WideChar-Util
 
+0.03    2013-04-13 (SHARYANTO) (not yet released)
+
+        - Reimplement mbwrap() to be more like Emacs and Text::ANSI::Util's
+          behavior.
+
+        - Provide wrap() as an alternative for Text::Wrap's wrap().
+
+
 0.02    2013-04-09 (SHARYANTO)
 
         [BUG FIXES]

@@ -46,6 +46,7 @@ sub _wrap {
         ($fltab) = $text =~ /^([ \t]*)\S/;
         $fltab //= "";
     }
+    my $sltab = $opts->{sltab};
     if (!defined($sltab)) {
         ($sltab) = $text =~ /^[^\n]*\S[\n]*^([ \t+]*)\S/;
         $sltab //= "";

@@ -10,6 +10,11 @@ use POSIX;
 use Test::More 0.98;
 use Text::WideChar::Util qw(mbpad mbswidth_height mbwrap mbtrunc);
 
+# check if chinese locale is supported, otherwise bail
+unless (POSIX::setlocale(&POSIX::LC_ALL, "zh_CN.utf8")) {
+    plan skip_all => "Chinese locale not supported on this system";
+}
+
 subtest "mbswidth_height" => sub {
     is_deeply(mbswidth_height(""), [0, 0]);
     is_deeply(mbswidth_height("我不想回家"), [10, 1]);

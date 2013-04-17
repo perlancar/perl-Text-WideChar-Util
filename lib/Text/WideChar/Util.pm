@@ -41,7 +41,12 @@ sub _wrap {
     $width //= 80;
     $opts  //= {};
 
-    my $fltab = $opts->{fltab};
+    my $deffltab = $opts->{fltab};
+    my $defsltab = $opts->{sltab};
+
+    if (!defined($deffltab) || !defined($defsltab)) {
+    }
+
     if (!defined($fltab)) {
         ($fltab) = $text =~ /^([ \t]*)\S/;
         $fltab //= "";
@@ -238,11 +243,6 @@ Note: currently performance is rather abysmal (~ 1500/s on my Core i5-2400
 
 Wrap C<$text> to C<$width> columns. It uses mbswidth() instead of Perl's
 length() which works on a per-character basis.
-
-Note: for text which does not have whitespaces between words, like Chinese, you
-will have to separate the words first (e.g. using L<Lingua::ZH::WordSegmenter>).
-The module also currently does not handle whitespace-like characters other than
-ASCII 32 (for example, the Chinese dot 。).
 
 Options:
 

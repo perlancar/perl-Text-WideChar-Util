@@ -330,6 +330,12 @@ length(), so it can handle wide characters.
 Does *not* handle multiple lines.
 
 
+=head1 INTERNAL NOTES
+
+Should we wrap at hyphens? Probably not. Both Emacs as well as Text::Wrap do
+not.
+
+
 =head1 FAQ
 
 =head2 How do I truncate or pad to a certain character length (instead of column width)?

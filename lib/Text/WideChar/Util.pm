@@ -131,6 +131,7 @@ sub _wrap {
 
             for my $word (@words) {
                 my $wordw = shift @wordsw;
+                #say "x=$x word=$word wordw=$wordw line_has_word=$line_has_word width=$width";
                 if ($x + ($line_has_word ? 1:0) + $wordw <= $width) {
                     if ($line_has_word) {
                         push @res, " ";

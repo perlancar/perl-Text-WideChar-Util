@@ -85,7 +85,12 @@ sub _wrap {
             # XXX emacs can also treat ' #' as indent, e.g. when wrapping
             # multi-line perl comment.
             ($fli) = $ptext =~ /\A([ \t]*)\S/;
-            $fliw = _get_indent_width($is_mb, $fli, $tw);
+            if (defined $fli) {
+                $fliw = _get_indent_width($is_mb, $fli, $tw);
+            } else {
+                $fli  = "";
+                $fliw = 0;
+            }
         }
         if (defined $optsli) {
             $sli  = $optsli;

@@ -7,7 +7,7 @@ use utf8;
 use warnings;
 
 use List::Util qw(max);
-use Text::CharWidth qw(mbswidth);
+use Text::CharWidth qw(mbswidth mbwidth);
 
 require Exporter;
 our @ISA       = qw(Exporter);
@@ -36,88 +36,124 @@ sub mbswidth_height {
     [max(@lens) // 0, $num_lines];
 }
 
+sub _get_indent_width {
+    my ($is_mb, $indent, $tab_width) = @_;
+    my $w = 0;
+    for (split //, $indent) {
+        if ($_ eq "\t") {
+            # go to the next tab
+            $w = $tab_width * (int($w/$tab_width) + 1);
+        } else {
+            $w += $is_mb ? mbwidth($_) : 1;
+        }
+    }
+    $w;
+}
+
 sub _wrap {
     my ($is_mb, $text, $width, $opts) = @_;
     $width //= 80;
     $opts  //= {};
 
-    my $deffltab = $opts->{fltab};
-    my $defsltab = $opts->{sltab};
+    # our algorithm: split into paragraphs, then process each paragraph. at the
+    # start of paragraph, determine indents (either from %opts, or deduced from
+    # text, like in Emacs) then push first-line indent. proceed to push words,
+    # while adding subsequent-line indent at the start of each line.
 
-    if (!defined($deffltab) || !defined($defsltab)) {
-    }
-
-    if (!defined($fltab)) {
-        ($fltab) = $text =~ /^([ \t]*)\S/;
-        $fltab //= "";
-    }
-    my $sltab = $opts->{sltab};
-    if (!defined($sltab)) {
-        ($sltab) = $text =~ /^[^\n]*\S[\n]*^([ \t+]*)\S/;
-        $sltab //= "";
-    }
-    say "D:fltab=[$fltab], sltab=[$sltab]";
-
+    my $tw = $opts->{tab_width} // 8;
+    die "Please specify a positive tab width" unless $tw > 0;
+    my $optfli  = $opts->{flindent};
+    my $optfliw = _get_indent_width($is_mb, $optfli, $tw) if defined $optfli;
+    my $optsli  = $opts->{slindent};
+    my $optsliw = _get_indent_width($is_mb, $optsli, $tw) if defined $optsli;
     my @res;
 
-    # to wrap, first we
+    my @para = split /(\n(?:[ \t]*\n)+)/, $text;
 
-    my @ch = split /(\s+)/i, $text;
+  PARA:
+    while (my ($ptext, $pbreak) = splice @para, 0, 2) {
+        my $x = 0;
+        my $y = 0;
+        my $line_has_word = 0;
 
-                my @p;
-
-    my $col = 0;
-    my $i = 0;
-    while (my $p = shift(@p)) {
-        $i++;
-        my $num_nl = 0;
-        my $is_pb; # paragraph break
-        my $is_ws;
-        my $w;
-        #say "D:col=$col, p=$p";
-        if ($p =~ /\A\s/s) {
-            $is_ws++;
-            $num_nl++ while $p =~ s/\r?\n//;
-            if ($num_nl >= 2) {
-                $is_pb++;
-                $w = 0;
-            } else {
-                $p = " ";
-                $w = 1;
-            }
+        # determine indents
+        my ($fli, $sli, $fliw, $sliw);
+        if (defined $optfli) {
+            $fli  = $optfli;
+            $fliw = $optfliw;
         } else {
-            $w = mbswidth($p);
+            # XXX emacs can also treat ' #' as indent, e.g. when wrapping
+            # multi-line perl comment.
+            ($fli) = $ptext =~ /\A([ \t]*)\S/;
+            $fliw = _get_indent_width($is_mb, $fli, $tw);
         }
-        $col += $w;
-        #say "D:col=$col, is_pb=${\($is_pb//0)}, is_ws=${\($is_ws//0)}, num_nl=$num_nl";
-
-        if ($is_pb) {
-            push @res, "\n" x $num_nl;
-            $col = 0;
-        } elsif ($col > $width+1) {
-            # remove whitespace at the end of prev line
-            if (@res && $res[-1] eq ' ') {
-                pop @res;
-            }
-
-            push @res, "\n";
-            if ($is_ws) {
-                $col = 0;
-            } else {
-                push @res, $p;
-                $col = $w;
-            }
+        if (defined $optsli) {
+            $sli  = $optsli;
+            $sliw = $optsliw;
         } else {
-            # remove space at the end of text
-            if (@p || !$is_ws) {
-                push @res, $p;
+            ($sli) = $ptext =~ /\A[^\n]*\S[\n]([ \t+]*)\S/;
+            if (defined $sli) {
+                $sliw = _get_indent_width($is_mb, $sli, $tw);
             } else {
-                if ($num_nl == 1) {
-                    push @res, "\n";
+                $sli  = "";
+                $sliw = 0;
+            }
+        }
+        die "Subsequent indent must be less than width" if $sliw >= $width;
+
+        push @res, $fli;
+        $x += $fliw;
+
+        # process each word
+        for my $word0 ($ptext =~ /(\S+)/g) {
+            my @words;
+            my @wordsw;
+            while (1) {
+                my $wordw = $is_mb ? mbswidth($word0) : length($word0);
+                if ($wordw <= $width-$sliw) {
+                    push @words , $word0;
+                    push @wordsw, $wordw;
+                    last;
+                }
+                # truncate long word
+                if ($is_mb) {
+                    my $res = mbtrunc($text, $width-$sliw, 1);
+                    push @words , $res->[0];
+                    push @wordsw, $res->[1];
+                    $word0 = substr($word0, length($res->[0]));
+                } else {
+                    my $w2 = substr($word0, 0, $width-$sliw);
+                    push @words , $w2;
+                    push @wordsw, $width-$sliw;
+                    $word0 = substr($word0, $width-$sliw);
                 }
             }
+
+            for my $word (@words) {
+                my $wordw = shift @wordsw;
+                if ($x + ($line_has_word ? 1:0) + $wordw <= $width) {
+                    if ($line_has_word) {
+                        push @res, " ";
+                        $x++;
+                    }
+                    push @res, $word;
+                    $x += $wordw;
+                } else {
+                    push @res, "\n", $sli, $word;
+                    $x = $sliw + $wordw;
+                    $y++;
+                }
+                $line_has_word++;
+            }
+        }
+
+        if (defined $pbreak) {
+            push @res, $pbreak;
+        } else {
+            push @res, "\n" if $ptext =~ /\n[ \t]*\z/;
         }
     }
+
     join "", @res;
 }
 
@@ -169,7 +205,7 @@ sub mbtrunc {
     my $end;
     while (1) {
         my $left  = substr($text, 0, $l);
-        my $right = substr($text, $l);
+        my $right = $l > length($text) ? "" : substr($text, $l);
         my $wl = mbswidth($left);
         #say "D: left=$left, right=$right, wl=$wl";
         if ($wres + $wl > $width) {
@@ -230,15 +266,6 @@ This module provides routines for dealing with text containing wide characters
 Like L<Text::CharWidth>'s mbswidth(), but also gives height (number of lines).
 For example, C<< mbswidth_height("foobar\nb\n") >> gives [6, 3].
 
-=head2 mbwrap($text, $width) => STR
-
-Wrap text to a specified column width.
-
-C<$width> defaults to 80 if not specified.
-
-Note: currently performance is rather abysmal (~ 1500/s on my Core i5-2400
-3.1GHz desktop for a ~ 1KB of text), so call this routine sparingly ;-).
-
 =head2 mbwrap($text, $width, \%opts) => STR
 
 Wrap C<$text> to C<$width> columns. It uses mbswidth() instead of Perl's
@@ -250,16 +277,23 @@ Options:
 
 =item * tab_width => INT (default: 8)
 
-=item * fltab => STR
+Set tab width.
+
+Note that tab will only have effect on the indent. Tab between text will be
+replaced with a single space.
+
+=item * flindent => STR
 
 First line indent. If unspecified, will be deduced from the first line of text.
 
-=item * sltab => STD
+=item * slindent => STD
 
 Subsequent line indent. If unspecified, will be deduced from the second line of
 text, or if unavailable, will default to empty string (C<"">).
 
 =back
+
+Performance: ~2300/s on my Core i5-2400 3.1GHz desktop for a ~1KB of text.
 
 =head2 wrap($text, $width, \%opts) => STR
 
@@ -268,6 +302,9 @@ mbswidth(). Provided as an alternative to the venerable L<Text::Wrap>'s wrap()
 but with a different behaviour. This module's wrap() can reflow newline and its
 behavior is more akin to Emacs (try reflowing a paragraph in Emacs using
 C<M-q>).
+
+Performance: ~3100/s on my Core i5-2400 3.1GHz desktop for a ~1KB of text.
+Text::Wrap::wrap() on the other hand can go ~3800/s.
 
 =head2 mbpad($text, $width[, $which[, $padchar[, $truncate]]]) => STR
 

@@ -248,8 +248,8 @@ sub mbtrunc {
  say mbpad("foo\nbarbaz\n", 10, "center", "."); # => "...foo....\n..barbaz..\n"
 
  # truncate text to a certain column width
- say mbtrunc("红色", 2 ); # => "红"
- say mbtrunc("红色", 3 ); # => "红"
+ say mbtrunc("红色",  2); # => "红"
+ say mbtrunc("红色",  3); # => "红"
  say mbtrunc("红red", 3); # => "红r"
 
 

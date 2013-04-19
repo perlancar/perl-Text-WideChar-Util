@@ -136,7 +136,7 @@ sub _wrap {
 
             for my $word (@words) {
                 my $wordw = shift @wordsw;
-                #say "x=$x word=$word wordw=$wordw line_has_word=$line_has_word width=$width";
+                #say "D:x=$x word=$word wordw=$wordw line_has_word=$line_has_word width=$width";
                 if ($x + ($line_has_word ? 1:0) + $wordw <= $width) {
                     if ($line_has_word) {
                         push @res, " ";
@@ -213,7 +213,7 @@ sub mbtrunc {
         my $left  = substr($text, 0, $l);
         my $right = $l > length($text) ? "" : substr($text, $l);
         my $wl = mbswidth($left);
-        #say "D: left=$left, right=$right, wl=$wl";
+        #say "D:left=$left, right=$right, wl=$wl";
         if ($wres + $wl > $width) {
             $text = $left;
         } else {

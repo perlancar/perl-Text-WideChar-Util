@@ -1,5 +1,10 @@
 Revision history for Text-WideChar-Util
 
+0.04    2013-04-19 (SHARYANTO)
+
+        - Fix bug in mbtrunc().
+
+
 0.03    2013-04-18 (SHARYANTO)
 
         - Reimplement mbwrap() to be more like Emacs and Text::ANSI::Util's

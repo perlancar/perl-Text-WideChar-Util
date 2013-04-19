@@ -10,6 +10,9 @@ use POSIX;
 use Test::More 0.98;
 use Text::WideChar::Util qw(wrap);
 
+# XXX test flindent opt is wider than width
+# XXX test flindent from text is wider than width
+
 {
     my $u = <<_;
 I dont wan't to go home. Where do you want to go? I'll keep you company. Mr Goh,

@@ -105,6 +105,9 @@ subtest "mbtrunc" => sub {
     is(mbtrunc("我不想",  5), "我不");
     is(mbtrunc("我不想",  6), "我不想");
     is(mbtrunc("我不想", 10), "我不想");
+
+    # 0.04
+    is(mbtrunc("12345", 4), "1234");
 };
 
 DONE_TESTING:

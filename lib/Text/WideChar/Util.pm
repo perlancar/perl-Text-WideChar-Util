@@ -200,15 +200,22 @@ sub mbpad {
 sub mbtrunc {
     my ($text, $width, $return_width) = @_;
 
+    # return_width (undocumented): if set to 1, will return [truncated_text,
+    # visual width, length(chars) up to truncation point]
+
     my $w = mbswidth($text);
     die "Invalid argument, width must not be negative" unless $width >= 0;
-    return $text if $w <= $width;
+    if ($w <= $width) {
+        return $return_width ? [$text, $w, length($text)] : $text;
+    }
+
+    my $c = 0;
 
     # perform binary cutting
     my @res;
     my $wres = 0; # total width of text in @res
     my $l = int($w/2); $l = 1 if $l == 0;
-    my $end;
+    my $end = 0;
     while (1) {
         my $left  = substr($text, 0, $l);
         my $right = $l > length($text) ? "" : substr($text, $l);
@@ -219,14 +226,16 @@ sub mbtrunc {
         } else {
             push @res, $left;
             $wres += $wl;
+            $c += length($left);
             $text = $right;
         }
         $l = int(($l+1)/2);
-        last if $l==1 && $end;
+        #say "D:l=$l";
+        last if $l==1 && $end>1;
         $end++ if $l==1;
     }
     if ($return_width) {
-        return [join("", @res), $wres];
+        return [join("", @res), $wres, $c];
     } else {
         return join("", @res);
     }

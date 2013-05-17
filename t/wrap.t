@@ -193,5 +193,11 @@ subtest "chop long word" => sub {
     is(wrap("  12345678901", 5, {slindent=>" "}), "  \n 1234\n 5678\n 901");
 };
 
+subtest "opt return_stats" => sub {
+    is_deeply(wrap("12345 123", 10, {return_stats=>1}),
+              ["12345 123", {max_word_width=>5, min_word_width=>3}],
+              "opt return_stats");
+};
+
 DONE_TESTING:
 done_testing();

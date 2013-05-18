@@ -1,5 +1,11 @@
 Revision history for Text-WideChar-Util
 
+0.06    2013-05-18 (SHARYANTO)
+
+        - Provide pad() and trunc() which are respectively the non-wide version
+          of mbpad() and mbtrunc().
+
+
 0.05    2013-05-17 (SHARYANTO)
 
         - Add return_stats option to {mb,}wrap.

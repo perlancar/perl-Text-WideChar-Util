@@ -8,7 +8,8 @@ use constant NL => "\n";
 
 use POSIX;
 use Test::More 0.98;
-use Text::WideChar::Util qw(mbpad mbswidth_height mbwrap mbtrunc);
+use Text::WideChar::Util qw(
+    mbpad pad mbswidth_height mbwrap wrap mbtrunc trunc);
 
 # check if chinese locale is supported, otherwise bail
 unless (POSIX::setlocale(&POSIX::LC_ALL, "zh_CN.utf8")) {
@@ -94,6 +95,10 @@ subtest "mbpad" => sub {
     is(mbpad("你好吗", 3, undef, undef, 1), "你 ", "trunc=1 repadded");
 };
 
+subtest "pad" => sub {
+    is(pad("我不想", 5), "我不想  ");
+};
+
 subtest "mbtrunc" => sub {
     is(mbtrunc("我不想",  0), "");
     is(mbtrunc("我不想",  1), "");
@@ -108,6 +113,10 @@ subtest "mbtrunc" => sub {
 
     # 0.04
     is(mbtrunc("12345", 4), "1234");
+};
+
+subtest "trunc" => sub {
+    is(trunc("我不想", 2), "我不");
 };
 
 DONE_TESTING:

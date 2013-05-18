@@ -13,8 +13,10 @@ require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(
                        mbpad
+                       pad
                        mbswidth_height
                        mbtrunc
+                       trunc
                        mbwrap
                        wrap
                );
@@ -185,8 +187,8 @@ sub wrap {
     _wrap(0, @_);
 }
 
-sub mbpad {
-    my ($text, $width, $which, $padchar, $is_trunc) = @_;
+sub _pad {
+    my ($is_mb, $text, $width, $which, $padchar, $is_trunc) = @_;
     if ($which) {
         $which = substr($which, 0, 1);
     } else {
@@ -194,7 +196,7 @@ sub mbpad {
     }
     $padchar //= " ";
 
-    my $w = mbswidth($text);
+    my $w = $is_mb ? mbswidth($text) : length($text);
     if ($is_trunc && $w > $width) {
         my $res = mbtrunc($text, $width, 1);
         $text = $res->[0] . ($padchar x ($width-$res->[1]));
@@ -211,13 +213,21 @@ sub mbpad {
     $text;
 }
 
-sub mbtrunc {
-    my ($text, $width, $return_width) = @_;
+sub mbpad {
+    _pad(1, @_);
+}
+
+sub pad {
+    _pad(0, @_);
+}
+
+sub _trunc {
+    my ($is_mb, $text, $width, $return_width) = @_;
 
     # return_width (undocumented): if set to 1, will return [truncated_text,
     # visual width, length(chars) up to truncation point]
 
-    my $w = mbswidth($text);
+    my $w = $is_mb ? mbswidth($text) : length($text);
     die "Invalid argument, width must not be negative" unless $width >= 0;
     if ($w <= $width) {
         return $return_width ? [$text, $w, length($text)] : $text;
@@ -233,7 +243,7 @@ sub mbtrunc {
     while (1) {
         my $left  = substr($text, 0, $l);
         my $right = $l > length($text) ? "" : substr($text, $l);
-        my $wl = mbswidth($left);
+        my $wl = $is_mb ? mbswidth($left) : length($left);
         #say "D:left=$left, right=$right, wl=$wl";
         if ($wres + $wl > $width) {
             $text = $left;
@@ -255,6 +265,14 @@ sub mbtrunc {
     }
 }
 
+sub mbtrunc {
+    _trunc(1, @_);
+}
+
+sub trunc {
+    _trunc(0, @_);
+}
+
 1;
 # ABSTRACT: Routines for text containing wide characters
 
@@ -263,7 +281,7 @@ sub mbtrunc {
 =head1 SYNOPSIS
 
  use Text::WideChar::Util qw(
-     mbpad mbswidth_height mbtrunc mbwrap wrap);
+     mbpad pad mbswidth_height mbtrunc trunc mbwrap wrap);
 
  # get width as well as number of lines
  say mbswidth_height("red\n红色"); # => [4, 2]
@@ -351,6 +369,10 @@ left+right padding to center the text.
 C<$padchar> is whitespace if not specified. It should be string having the width
 of 1 column.
 
+=head2 pad($text, $width[, $which[, $padchar[, $truncate]]]) => STR
+
+The non-wide version of mbpad(), just like in mbwrap() vs wrap().
+
 =head2 mbtrunc($text, $width) => STR
 
 Truncate C<$text> to C<$width> columns. It uses mbswidth() instead of Perl's
@@ -358,18 +380,16 @@ length(), so it can handle wide characters.
 
 Does *not* handle multiple lines.
 
+=head2 trunc($text, $width) => STR
+
+The non-wide version of mbtrunc(), just like in mbwrap() vs wrap(). This is
+actually not much more than Perl's C<< substr($text, 0, $width) >>.
+
 
 =head1 INTERNAL NOTES
 
 Should we wrap at hyphens? Probably not. Both Emacs as well as Text::Wrap do
 not.
-
-
-=head1 FAQ
-
-=head2 How do I truncate or pad to a certain character length (instead of column width)?
-
-You can simply use Perl's substr() which works by character.
 
 
 =head1 TODOS

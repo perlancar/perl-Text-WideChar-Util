@@ -1,5 +1,11 @@
 Revision history for Text-WideChar-Util
 
+0.07    2013-09-10 (SHARYANTO)
+
+        - Replace Text::CharWidth with Unicode::GCString. It's about 2.5x slower
+          but it is more proper and builds on Windows.
+
+
 0.06    2013-05-18 (SHARYANTO)
 
         - Provide pad() and trunc() which are respectively the non-wide version

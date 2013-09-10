@@ -313,7 +313,7 @@ This module provides routines for dealing with text containing wide characters
 
 =head1 FUNCTIONS
 
-=head1 mbswidth($text) => INT
+=head2 mbswidth($text) => INT
 
 Like L<Text::CharWidth>'s mbswidth(), except implemented using L<<
 Unicode::GCString->new($text)->columns >>.

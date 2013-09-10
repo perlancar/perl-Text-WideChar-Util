@@ -7,13 +7,14 @@ use utf8;
 use warnings;
 
 use List::Util qw(max);
-use Text::CharWidth qw(mbswidth mbwidth);
+use Unicode::GCString;
 
 require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(
                        mbpad
                        pad
+                       mbswidth
                        mbswidth_height
                        mbtrunc
                        trunc
@@ -22,6 +23,10 @@ our @EXPORT_OK = qw(
                );
 
 # VERSION
+
+sub mbswidth {
+    Unicode::GCString->new($_[0])->columns;
+}
 
 sub mbswidth_height {
     my $text = shift;
@@ -46,7 +51,7 @@ sub _get_indent_width {
             # go to the next tab
             $w = $tab_width * (int($w/$tab_width) + 1);
         } else {
-            $w += $is_mb ? mbwidth($_) : 1;
+            $w += $is_mb ? mbswidth($_) : 1;
         }
     }
     $w;
@@ -281,7 +286,7 @@ sub trunc {
 =head1 SYNOPSIS
 
  use Text::WideChar::Util qw(
-     mbpad pad mbswidth_height mbtrunc trunc mbwrap wrap);
+     mbpad pad mbswidth mbswidth_height mbtrunc trunc mbwrap wrap);
 
  # get width as well as number of lines
  say mbswidth_height("red\n红色"); # => [4, 2]
@@ -308,10 +313,15 @@ This module provides routines for dealing with text containing wide characters
 
 =head1 FUNCTIONS
 
+=head1 mbswidth($text) => INT
+
+Like L<Text::CharWidth>'s mbswidth(), except implemented using L<<
+Unicode::GCString->new($text)->columns >>.
+
 =head2 mbswidth_height($text) => [INT, INT]
 
-Like L<Text::CharWidth>'s mbswidth(), but also gives height (number of lines).
-For example, C<< mbswidth_height("foobar\nb\n") >> gives [6, 3].
+Like mbswidth(), but also gives height (number of lines). For example, C<<
+mbswidth_height("foobar\nb\n") >> gives [6, 3].
 
 =head2 mbwrap($text, $width, \%opts) => STR
 
@@ -401,7 +411,7 @@ not.
 
 =head1 SEE ALSO
 
-L<Text::CharWidth> which provides mbswidth().
+L<Unicode::GCString>.
 
 L<Text::ANSI::Util> which can also handle text containing wide characters as
 well ANSI escape codes.

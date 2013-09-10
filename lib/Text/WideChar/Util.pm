@@ -356,7 +356,7 @@ information like C<max_word_width>, C<min_word_width>.
 
 =back
 
-Performance: ~2300/s on my Core i5-2400 3.1GHz desktop for a ~1KB of text.
+Performance: ~650/s on my Core i5 1.7GHz laptop for a 1KB of text.
 
 =head2 wrap($text, $width, \%opts) => STR
 
@@ -366,8 +366,8 @@ but with a different behaviour. This module's wrap() can reflow newline and its
 behavior is more akin to Emacs (try reflowing a paragraph in Emacs using
 C<M-q>).
 
-Performance: ~3100/s on my Core i5-2400 3.1GHz desktop for a ~1KB of text.
-Text::Wrap::wrap() on the other hand can go ~3800/s.
+Performance: ~2000/s on my Core i5 1.7GHz laptop for a ~1KB of text.
+Text::Wrap::wrap() on the other hand is ~2500/s.
 
 =head2 mbpad($text, $width[, $which[, $padchar[, $truncate]]]) => STR
 
@@ -411,7 +411,10 @@ not.
 
 =head1 SEE ALSO
 
-L<Unicode::GCString>.
+L<Unicode::GCString> which is consulted for visual width of characters.
+L<Text::CharWidth> is about 2.5x faster but it gives weird results (-1 for
+characters like "\n" and "\t") and my Strawberry Perl installation fails to
+build it.
 
 L<Text::ANSI::Util> which can also handle text containing wide characters as
 well ANSI escape codes.

@@ -1,5 +1,11 @@
 Revision history for Text-WideChar-Util
 
+0.08    2013-10-29 (SHARYANTO)
+
+        - No functional changes. Rebuild to resolve 'nested encoding' problem
+          causing MetaCPAN to fail to index the dist (thanks Shantanu Bhadoria).
+
+
 0.07    2013-09-10 (SHARYANTO)
 
         - Replace Text::CharWidth with Unicode::GCString. It's about 2.5x slower

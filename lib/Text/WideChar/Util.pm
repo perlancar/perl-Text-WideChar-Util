@@ -281,8 +281,6 @@ sub trunc {
 1;
 # ABSTRACT: Routines for text containing wide characters
 
-=encoding utf8
-
 =head1 SYNOPSIS
 
  use Text::WideChar::Util qw(

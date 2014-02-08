@@ -1,5 +1,13 @@
 Revision history for Text-WideChar-Util
 
+0.10    2014-02-08 (SHARYANTO)
+
+        - No functional changes.
+
+        - Change CJK regexes from my() to our() so it's usable by other module
+          (namely, Text::ANSI::Util).
+
+
 0.09    2014-02-08 (SHARYANTO)
 
         - mbwrap(): Fix bug when truncating long word.

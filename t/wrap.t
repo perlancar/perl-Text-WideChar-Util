@@ -8,7 +8,7 @@ use constant NL => "\n";
 
 use POSIX;
 use Test::More 0.98;
-use Text::WideChar::Util qw(wrap);
+use Text::WideChar::Util qw(wrap mbwrap);
 
 # XXX test flindent opt is wider than width
 # XXX test flindent from text is wider than width
@@ -191,6 +191,13 @@ subtest "chop long word" => sub {
     is(wrap("12345678901", 5), "12345\n67890\n1");
     is(wrap("  12345678901", 5), "  \n12345\n67890\n1");
     is(wrap("  12345678901", 5, {slindent=>" "}), "  \n 1234\n 5678\n 901");
+};
+
+subtest "chop long word (mb)" => sub {
+    is(mbwrap("1234567890",  5), "12345\n67890");
+    is(mbwrap("12345678901", 5), "12345\n67890\n1");
+    is(mbwrap("  12345678901", 5), "  \n12345\n67890\n1");
+    is(mbwrap("  12345678901", 5, {slindent=>" "}), "  \n 1234\n 5678\n 901");
 };
 
 subtest "opt return_stats" => sub {

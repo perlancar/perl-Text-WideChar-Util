@@ -76,6 +76,7 @@ sub _wrap {
     my @res;
 
     my @para = split /(\n(?:[ \t]*\n)+)/, $text;
+    #say "D:para=[",join(", ", @para),"]";
 
     my ($maxww, $minww);
 
@@ -132,15 +133,17 @@ sub _wrap {
                 }
                 # truncate long word
                 if ($is_mb) {
-                    my $res = mbtrunc($text, $width-$sliw, 1);
+                    my $res = mbtrunc($word0, $width-$sliw, 1);
                     push @words , $res->[0];
                     push @wordsw, $res->[1];
                     $word0 = substr($word0, length($res->[0]));
+                    #say "D:truncated long word (mb): $text -> $res->[0] & $res->[1], word0=$word0";
                 } else {
                     my $w2 = substr($word0, 0, $width-$sliw);
                     push @words , $w2;
                     push @wordsw, $width-$sliw;
                     $word0 = substr($word0, $width-$sliw);
+                    #say "D:truncated long word: $w2, ".($width-$sliw).", word0=$word0";
                 }
             }
 

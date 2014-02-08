@@ -57,6 +57,47 @@ sub _get_indent_width {
     $w;
 }
 
+my $re_cjk = qr/(?:
+                 \p{Block=CJK_Compatibility}
+             |   \p{Block=CJK_Compatibility_Forms}
+             |   \p{Block=CJK_Compatibility_Ideographs}
+             |   \p{Block=CJK_Compatibility_Ideographs_Supplement}
+             |   \p{Block=CJK_Radicals_Supplement}
+             |   \p{Block=CJK_Strokes}
+             |   \p{Block=CJK_Symbols_And_Punctuation}
+             |   \p{Block=CJK_Unified_Ideographs}
+             |   \p{Block=CJK_Unified_Ideographs_Extension_A}
+             |   \p{Block=CJK_Unified_Ideographs_Extension_B}
+             #|   \p{Block=CJK_Unified_Ideographs_Extension_C}
+             [，。]
+             )/x;
+my $re_cjk_class = qr/[
+                          \p{Block=CJK_Compatibility}
+                          \p{Block=CJK_Compatibility_Forms}
+                          \p{Block=CJK_Compatibility_Ideographs}
+                          \p{Block=CJK_Compatibility_Ideographs_Supplement}
+                          \p{Block=CJK_Radicals_Supplement}
+                          \p{Block=CJK_Strokes}
+                          \p{Block=CJK_Symbols_And_Punctuation}
+                          \p{Block=CJK_Unified_Ideographs}
+                          \p{Block=CJK_Unified_Ideographs_Extension_A}
+                          \p{Block=CJK_Unified_Ideographs_Extension_B}
+                          ，。
+                      ]/x;
+my $re_cjk_negclass = qr/[^
+                             \p{Block=CJK_Compatibility}
+                             \p{Block=CJK_Compatibility_Forms}
+                             \p{Block=CJK_Compatibility_Ideographs}
+                             \p{Block=CJK_Compatibility_Ideographs_Supplement}
+                             \p{Block=CJK_Radicals_Supplement}
+                             \p{Block=CJK_Strokes}
+                             \p{Block=CJK_Symbols_And_Punctuation}
+                             \p{Block=CJK_Unified_Ideographs}
+                             \p{Block=CJK_Unified_Ideographs_Extension_A}
+                             \p{Block=CJK_Unified_Ideographs_Extension_B}
+                             ，。
+                      ]/x;
+
 sub _wrap {
     my ($is_mb, $text, $width, $opts) = @_;
     $width //= 80;
@@ -119,8 +160,31 @@ sub _wrap {
         push @res, $fli;
         $x += $fliw;
 
+        my @words0; # (WORD1, WORD1_IS_CJK?, WS_AFTER?, WORD2, WORD2_IS_CJK?, WS_AFTER?, ...)
+        # we break CJK per letter because they don't use whitespace between
+        # words
+        while ($ptext =~ /(?: ($re_cjk+)|(\S+) ) (\s*)/gox) {
+            my $ws_after = $3 ? 1:0;
+            if ($1) {
+                push @words0, $1, 1, $ws_after;
+            } else {
+                my $ptext2 = $2;
+                while ($ptext2 =~ /($re_cjk_class+)|
+                                   ($re_cjk_negclass+)/gox) {
+                    if ($1) {
+                        push @words0, $1, 1, 0;
+                    } else {
+                        push @words0, $2, 0, 0;
+                    }
+                }
+                $words0[-1] = $ws_after;
+            }
+        }
+
         # process each word
-        for my $word0 ($ptext =~ /(\S+)/g) {
+        my $prev_ws_after;
+        while (@words0) {
+            my ($word0, $is_cjk, $ws_after) = splice @words0, 0, 3;
             my @words;
             my @wordsw;
             while (1) {
@@ -149,25 +213,41 @@ sub _wrap {
 
             for my $word (@words) {
                 my $wordw = shift @wordsw;
-                #say "D:x=$x word=$word wordw=$wordw line_has_word=$line_has_word width=$width";
+                #say "D:x=$x word=$word is_cjk=$is_cjk ws_after=$ws_after wordw=$wordw line_has_word=$line_has_word width=$width";
 
                 $maxww = $wordw if !defined($maxww) || $maxww < $wordw;
                 $minww = $wordw if !defined($minww) || $minww > $wordw;
 
-                if ($x + ($line_has_word ? 1:0) + $wordw <= $width) {
+                my $x_after_word = $x + ($line_has_word ? 1:0) + $wordw;
+                if ($x_after_word <= $width) {
+                    # the addition of word hasn't exceeded column width
                     if ($line_has_word) {
-                        push @res, " ";
-                        $x++;
+                        if ($prev_ws_after) {
+                            push @res, " ";
+                            $x++;
+                        }
                     }
                     push @res, $word;
                     $x += $wordw;
                 } else {
+                    if ($is_cjk) {
+                        # CJK word can be broken
+                        my $res = mbtrunc($word, $width - $x, 1);
+                        push @res, $res->[0];
+                        my $word2 = substr($word, length($res->[0]));
+                        #say "D:truncated CJK word: $word -> $res->[0] & $res->[1], remaining=$word2";
+                        $word = $word2;
+                        $wordw = mbswidth($word);
+                    }
+
+                    # move the word to the next line
                     push @res, "\n", $sli, $word;
                     $x = $sliw + $wordw;
                     $y++;
                 }
                 $line_has_word++;
             }
+            $prev_ws_after = $ws_after;
         }
 
         if (defined $pbreak) {
@@ -327,11 +407,9 @@ mbswidth_height("foobar\nb\n") >> gives [6, 3].
 =head2 mbwrap($text, $width, \%opts) => STR
 
 Wrap C<$text> to C<$width> columns. It uses mbswidth() instead of Perl's
-length() which works on a per-character basis.
-
-Currently only looks at whitespace to split words. Take a look at
-L<Text::WrapI18N>, which is currently more suitable for wrapping text which
-don't use whitespace between words (e.g. Chinese/Japanese).
+length() which works on a per-character basis. Has some support for wrapping
+Kanji/CJK (Chinese/Japanese/Korean) text which do not have whitespace between
+words.
 
 Options:
 
@@ -361,7 +439,7 @@ information like C<max_word_width>, C<min_word_width>.
 
 =back
 
-Performance: ~650/s on my Core i5 1.7GHz laptop for a 1KB of text.
+Performance: ~450/s on my Core i5 1.7GHz laptop for a 1KB of text.
 
 =head2 wrap($text, $width, \%opts) => STR
 
@@ -424,7 +502,8 @@ build it.
 L<Text::ANSI::Util> which can also handle text containing wide characters as
 well ANSI escape codes.
 
-L<Text::WrapI18N> which is currently more suitable for wrapping Chinese/Japanese
-text (text which don't use whitespace between words).
+L<Text::WrapI18N> which provides an alternative to wrap()/mbwrap() with
+comparable speed, though wrapping result might differ slightly. And the module
+currently uses Text::CharWidth.
 
 =cut

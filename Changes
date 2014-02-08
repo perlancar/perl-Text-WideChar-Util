@@ -1,5 +1,15 @@
 Revision history for Text-WideChar-Util
 
+0.09    2014-02-08 (SHARYANTO)
+
+        - mbwrap(): Fix bug when truncating long word.
+
+        - mbwrap(): Add support for wrapping CJK text (which do not use
+          whitespace to separate words).
+
+        - Mention Text::WrapI18N.
+
+
 0.08    2013-10-29 (SHARYANTO)
 
         - No functional changes. Rebuild to resolve 'nested encoding' problem

@@ -326,6 +326,10 @@ mbswidth_height("foobar\nb\n") >> gives [6, 3].
 Wrap C<$text> to C<$width> columns. It uses mbswidth() instead of Perl's
 length() which works on a per-character basis.
 
+Currently only looks at whitespace to split words. Take a look at
+L<Text::WrapI18N>, which is currently more suitable for wrapping text which
+don't use whitespace between words (e.g. Chinese/Japanese).
+
 Options:
 
 =over
@@ -416,5 +420,8 @@ build it.
 
 L<Text::ANSI::Util> which can also handle text containing wide characters as
 well ANSI escape codes.
+
+L<Text::WrapI18N> which is currently more suitable for wrapping Chinese/Japanese
+text (text which don't use whitespace between words).
 
 =cut

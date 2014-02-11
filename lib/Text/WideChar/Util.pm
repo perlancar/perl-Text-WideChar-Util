@@ -194,7 +194,9 @@ sub _wrap {
             while (1) {
                 my $wordw = $is_mb ? mbswidth($word0) : length($word0);
 
-                if ($wordw <= $width-$sliw) {
+                # long cjk word is not truncated here because it will be
+                # line-broken later when wrapping.
+                if ($wordw <= $width-$sliw || $is_cjk) {
                     push @words , $word0;
                     push @wordsw, $wordw;
                     last;
@@ -234,20 +236,30 @@ sub _wrap {
                     push @res, $word;
                     $x += $wordw;
                 } else {
-                    if ($is_cjk) {
-                        # CJK word can be broken
-                        my $res = mbtrunc($word, $width - $x, 1);
-                        push @res, $res->[0];
-                        my $word2 = substr($word, length($res->[0]));
-                        #say "D:truncated CJK word: $word -> $res->[0] & $res->[1], remaining=$word2";
-                        $word = $word2;
-                        $wordw = mbswidth($word);
-                    }
+                    while (1) {
+                        if ($is_cjk) {
+                            # CJK word can be broken
+                            my $res = mbtrunc($word, $width - $x, 1);
+                            push @res, $res->[0];
+                            my $word2 = substr($word, length($res->[0]));
+                            #say "D:truncated CJK word: $word -> $res->[0] & $res->[1], remaining=$word2";
+                            $word = $word2;
+                            $wordw = mbswidth($word);
+                        }
 
-                    # move the word to the next line
-                    push @res, "\n", $sli, $word;
-                    $x = $sliw + $wordw;
-                    $y++;
+                        # move the word to the next line
+                        push @res, "\n", $sli;
+                        $y++;
+
+                        if ($sliw + $wordw <= $width) {
+                            push @res, $word;
+                            $x = $sliw + $wordw;
+                            last;
+                        } else {
+                            # still too long, truncate again
+                            $x = $sliw;
+                        }
+                    }
                 }
                 $line_has_word++;
             }

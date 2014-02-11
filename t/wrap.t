@@ -233,5 +233,17 @@ _
     is(mbwrap($input, 20), $res);
 };
 
+subtest "long cjk word is not truncated before line-broken" => sub {
+    my $input = <<'_';
+aku mau 吃饭吃饭吃饭吃饭 kuingat kamu.
+_
+    my $res = <<'_';
+aku mau吃饭吃饭
+吃饭吃饭
+kuingat kamu.
+_
+    is(mbwrap($input, 15), $res);
+};
+
 DONE_TESTING:
 done_testing();

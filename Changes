@@ -1,5 +1,12 @@
 Revision history for Text-WideChar-Util
 
+0.12    2014-02-11 (SHARYANTO)
+
+        [BUG FIXES]
+
+        - mbwrap(): Whitespace before broken CJK word was omitted.
+
+
 0.11    2014-02-11 (SHARYANTO)
 
         [BUG FIXES]

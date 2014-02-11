@@ -1,5 +1,12 @@
 Revision history for Text-WideChar-Util
 
+0.11    2014-02-11 (SHARYANTO)
+
+        [BUG FIXES]
+
+        - mbwrap(): Long CJK word should not be truncated before line-broken.
+
+
 0.10    2014-02-08 (SHARYANTO)
 
         - No functional changes.

@@ -161,8 +161,12 @@ sub _wrap {
         $x += $fliw;
 
         my @words0; # (WORD1, WORD1_IS_CJK?, WS_AFTER?, WORD2, WORD2_IS_CJK?, WS_AFTER?, ...)
-        # we break CJK per letter because they don't use whitespace between
-        # words
+        # we differentiate/split between CJK "word" (cluster of CJK letters,
+        # really) and non-CJK word, e.g. "我很爱你my可爱的and beautiful,
+        # beautiful wife" is split to ["我很爱你", "my", "可爱的", "and",
+        # "beautiful,", "beautiful", "wife"]. we do this because CJK word can be
+        # line-broken on a per-letter basis, as they don't separate words with
+        # whitespaces.
         while ($ptext =~ /(?: ($re_cjk+)|(\S+) ) (\s*)/gox) {
             my $ws_after = $3 ? 1:0;
             if ($1) {

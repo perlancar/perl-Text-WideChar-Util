@@ -238,8 +238,8 @@ subtest "long cjk word is not truncated before line-broken" => sub {
 aku mau 吃饭吃饭吃饭吃饭 kuingat kamu.
 _
     my $res = <<'_';
-aku mau吃饭吃饭
-吃饭吃饭
+aku mau 吃饭吃
+饭吃饭吃饭
 kuingat kamu.
 _
     is(mbwrap($input, 15), $res);

@@ -239,8 +239,14 @@ sub _wrap {
                     while (1) {
                         if ($is_cjk) {
                             # CJK word can be broken
-                            my $res = mbtrunc($word, $width - $x, 1);
-                            push @res, $res->[0];
+                            my $res;
+                            if ($prev_ws_after) {
+                                $res = mbtrunc($word, $width - $x - 1, 1);
+                                push @res, " ", $res->[0];
+                            } else {
+                                $res = mbtrunc($word, $width - $x, 1);
+                                push @res, $res->[0];
+                            }
                             my $word2 = substr($word, length($res->[0]));
                             #say "D:truncated CJK word: $word -> $res->[0] & $res->[1], remaining=$word2";
                             $word = $word2;

@@ -1,5 +1,10 @@
 Revision history for Text-WideChar-Util
 
+0.13    2014-02-17 (SHARYANTO)
+
+        - Add function length_height().
+
+
 0.12    2014-02-11 (SHARYANTO)
 
         [BUG FIXES]

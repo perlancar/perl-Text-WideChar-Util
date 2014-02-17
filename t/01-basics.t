@@ -9,7 +9,7 @@ use constant NL => "\n";
 use POSIX;
 use Test::More 0.98;
 use Text::WideChar::Util qw(
-    mbpad pad mbswidth_height mbwrap wrap mbtrunc trunc);
+    mbpad pad mbswidth_height length_height mbwrap wrap mbtrunc trunc);
 
 # check if chinese locale is supported, otherwise bail
 unless (POSIX::setlocale(&POSIX::LC_ALL, "zh_CN.utf8")) {
@@ -21,6 +21,13 @@ subtest "mbswidth_height" => sub {
     is_deeply(mbswidth_height("我不想回家"), [10, 1]);
     is_deeply(mbswidth_height("我不想\n回家"), [6, 2]);
     is_deeply(mbswidth_height("我不\n想回家\n"), [6, 3]);
+};
+
+subtest "length_height" => sub {
+    is_deeply(length_height(""), [0, 0]);
+    is_deeply(length_height("abc"), [3, 1]);
+    is_deeply(length_height("abc\nde"), [3, 2]);
+    is_deeply(length_height("ab\ncde\n"), [3, 3]);
 };
 
 # single paragraph

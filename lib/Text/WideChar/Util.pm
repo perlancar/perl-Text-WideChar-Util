@@ -6,7 +6,6 @@ use strict;
 use utf8;
 use warnings;
 
-use List::Util qw(max);
 use Unicode::GCString;
 
 require Exporter;
@@ -16,6 +15,7 @@ our @EXPORT_OK = qw(
                        pad
                        mbswidth
                        mbswidth_height
+                       length_height
                        mbtrunc
                        trunc
                        mbwrap
@@ -31,16 +31,33 @@ sub mbswidth {
 sub mbswidth_height {
     my $text = shift;
     my $num_lines = 0;
-    my @lens;
+    my $len = 0;
     for my $e (split /(\r?\n)/, $text) {
         if ($e =~ /\n/) {
             $num_lines++;
             next;
         }
         $num_lines = 1 if $num_lines == 0;
-        push @lens, mbswidth($e);
+        my $l = mbswidth($e);
+        $len = $l if $len < $l;
     }
-    [max(@lens) // 0, $num_lines];
+    [$len, $num_lines];
+}
+
+sub length_height {
+    my $text = shift;
+    my $num_lines = 0;
+    my $len = 0;
+    for my $e (split /(\r?\n)/, $text) {
+        if ($e =~ /\n/) {
+            $num_lines++;
+            next;
+        }
+        $num_lines = 1 if $num_lines == 0;
+        my $l = length($e);
+        $len = $l if $len < $l;
+    }
+    [$len, $num_lines];
 }
 
 sub _get_indent_width {
@@ -425,6 +442,11 @@ Unicode::GCString->new($text)->columns >>.
 
 Like mbswidth(), but also gives height (number of lines). For example, C<<
 mbswidth_height("foobar\nb\n") >> gives [6, 3].
+
+=head2 length_height($text) => [INT, INT]
+
+This is the non-wide version of mbswidth_height() and can be used if your text
+only contains printable ASCII characters and newlines.
 
 =head2 mbwrap($text, $width, \%opts) => STR
 

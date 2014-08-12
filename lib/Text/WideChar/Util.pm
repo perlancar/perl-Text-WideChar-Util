@@ -533,6 +533,10 @@ not.
 
 =over
 
+=item * Split wrap() to another dist
+
+So C<Unicode::GCString> is not pulled if not needed.
+
 =back
 
 

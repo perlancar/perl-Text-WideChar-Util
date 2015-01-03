@@ -1,5 +1,8 @@
 package Text::WideChar::Util;
 
+# DATE
+# VERSION
+
 use 5.010001;
 use locale;
 use strict;
@@ -21,8 +24,6 @@ our @EXPORT_OK = qw(
                        mbwrap
                        wrap
                );
-
-# VERSION
 
 sub mbswidth {
     Unicode::GCString->new($_[0])->columns;
@@ -527,17 +528,6 @@ actually not much more than Perl's C<< substr($text, 0, $width) >>.
 
 Should we wrap at hyphens? Probably not. Both Emacs as well as Text::Wrap do
 not.
-
-
-=head1 TODOS
-
-=over
-
-=item * Split wrap() to another dist
-
-So C<Unicode::GCString> is not pulled if not needed.
-
-=back
 
 
 =head1 SEE ALSO

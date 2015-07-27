@@ -87,7 +87,7 @@ our $re_cjk = qr/(?:
                  |   \p{Block=CJK_Unified_Ideographs_Extension_A}
                  |   \p{Block=CJK_Unified_Ideographs_Extension_B}
                      #|   \p{Block=CJK_Unified_Ideographs_Extension_C}
-                     [，。]
+                     [\N{IDEOGRAPHIC FULL STOP}\N{FULLWIDTH COMMA}]
                  )/x;
 our $re_cjk_class = qr/[
                            \p{Block=CJK_Compatibility}
@@ -100,7 +100,8 @@ our $re_cjk_class = qr/[
                            \p{Block=CJK_Unified_Ideographs}
                            \p{Block=CJK_Unified_Ideographs_Extension_A}
                            \p{Block=CJK_Unified_Ideographs_Extension_B}
-                           ，。
+                           \N{IDEOGRAPHIC FULL STOP}
+                           \N{FULLWIDTH COMMA}
                       ]/x;
 our $re_cjk_negclass = qr/[^
                               \p{Block=CJK_Compatibility}
@@ -113,7 +114,8 @@ our $re_cjk_negclass = qr/[^
                               \p{Block=CJK_Unified_Ideographs}
                               \p{Block=CJK_Unified_Ideographs_Extension_A}
                               \p{Block=CJK_Unified_Ideographs_Extension_B}
-                              ，。
+                              \N{IDEOGRAPHIC FULL STOP}
+                              \N{FULLWIDTH COMMA}
                       ]/x;
 
 sub _wrap {

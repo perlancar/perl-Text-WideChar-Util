@@ -1,5 +1,14 @@
 Revision history for Text-WideChar-Util
 
+0.15    2015-07-27 (PERLANCAR)
+
+	- No functional changes.
+
+	- Replace Unicode literal with \N{...} so code (except POD) does
+	  not contain Unicode literals, to make it easier to pack with
+	  App::depak.
+
+
 0.14    2015-01-03 (PERLANCAR)
 
 	- No functional changes.

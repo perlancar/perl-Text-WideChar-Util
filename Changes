@@ -1,5 +1,13 @@
 Revision history for Text-WideChar-Util
 
+0.16    2015-07-29 (PERLANCAR)
+
+	- No functional changes.
+
+	- Replace named Unicode literal \N{...} with hexcode to accomodate
+	  older perls [CT].
+
+
 0.15    2015-07-27 (PERLANCAR)
 
 	- No functional changes.

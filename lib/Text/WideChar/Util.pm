@@ -75,6 +75,9 @@ sub _get_indent_width {
     $w;
 }
 
+# 3002 = IDEOGRAPHIC FULL STOP
+# ff0c = FULLWIDTH COMMA
+
 our $re_cjk = qr/(?:
                      \p{Block=CJK_Compatibility}
                  |   \p{Block=CJK_Compatibility_Forms}
@@ -87,7 +90,7 @@ our $re_cjk = qr/(?:
                  |   \p{Block=CJK_Unified_Ideographs_Extension_A}
                  |   \p{Block=CJK_Unified_Ideographs_Extension_B}
                      #|   \p{Block=CJK_Unified_Ideographs_Extension_C}
-                     [\N{IDEOGRAPHIC FULL STOP}\N{FULLWIDTH COMMA}]
+                     [\x{3002}\x{ff0c}]
                  )/x;
 our $re_cjk_class = qr/[
                            \p{Block=CJK_Compatibility}
@@ -100,8 +103,8 @@ our $re_cjk_class = qr/[
                            \p{Block=CJK_Unified_Ideographs}
                            \p{Block=CJK_Unified_Ideographs_Extension_A}
                            \p{Block=CJK_Unified_Ideographs_Extension_B}
-                           \N{IDEOGRAPHIC FULL STOP}
-                           \N{FULLWIDTH COMMA}
+                           \x{3002}
+                           \x{ff0c}
                       ]/x;
 our $re_cjk_negclass = qr/[^
                               \p{Block=CJK_Compatibility}
@@ -114,8 +117,8 @@ our $re_cjk_negclass = qr/[^
                               \p{Block=CJK_Unified_Ideographs}
                               \p{Block=CJK_Unified_Ideographs_Extension_A}
                               \p{Block=CJK_Unified_Ideographs_Extension_B}
-                              \N{IDEOGRAPHIC FULL STOP}
-                              \N{FULLWIDTH COMMA}
+                              \x{3002}
+                              \x{ff0c}
                       ]/x;
 
 sub _wrap {

@@ -549,4 +549,8 @@ L<Text::WrapI18N> which provides an alternative to wrap()/mbwrap() with
 comparable speed, though wrapping result might differ slightly. And the module
 currently uses Text::CharWidth.
 
+L<Text::NonWideChar::Util> contains non-wide version of some of the
+abovementioned routines (the non-wide version of the routines will eventually be
+moved here).
+
 =cut

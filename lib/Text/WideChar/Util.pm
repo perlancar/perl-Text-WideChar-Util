@@ -137,7 +137,7 @@ sub _wrap {
     my $optfliw = _get_indent_width($is_mb, $optfli, $tw) if defined $optfli;
     my $optsli  = $opts->{slindent};
     my $optsliw = _get_indent_width($is_mb, $optsli, $tw) if defined $optsli;
-    my $optktw  = $opts->{keep_trailing_space} // 0;
+    my $optkts  = $opts->{keep_trailing_space} // 0;
     my @res;
 
     my @para = split /(\n(?:[ \t]*\n)+)/, $text;
@@ -279,7 +279,7 @@ sub _wrap {
                         }
 
                         # move the word to the next line
-                        push @res, " " if $prev_ws_after && $optktw;
+                        push @res, " " if $prev_ws_after && $optkts;
                         push @res, "\n", $sli;
                         $y++;
 

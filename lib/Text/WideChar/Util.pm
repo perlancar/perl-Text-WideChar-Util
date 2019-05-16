@@ -137,7 +137,7 @@ sub _wrap {
     my $optfliw = _get_indent_width($is_mb, $optfli, $tw) if defined $optfli;
     my $optsli  = $opts->{slindent};
     my $optsliw = _get_indent_width($is_mb, $optsli, $tw) if defined $optsli;
-    my $optktw  = $opts->{keep_trailing_ws} // 0;
+    my $optktw  = $opts->{keep_trailing_space} // 0;
     my @res;
 
     my @para = split /(\n(?:[ \t]*\n)+)/, $text;
@@ -492,17 +492,21 @@ If set to true, then instead of returning the wrapped string, function will
 return C<< [$wrapped, $stats] >> where C<$stats> is a hash containing some
 information like C<max_word_width>, C<min_word_width>.
 
-=item * keep_trailing_ws => BOOL (default: 0)
+=item * keep_trailing_space => BOOL (default: 0)
 
-If set to true, then trailing whitespaces will be kept. This option is useful if
-you want to re-join the lines later. Without this option set to true, C<"some
-long line"> will be wrapped (width=4) as (quotes shown):
+If set to true, then trailing space that separates words will be kept at the end
+of wrapped lines. This option is useful if you want to rejoin the lines later.
+Without this option set to true, wrapping this line at width=4 (quotes shown):
+
+ "some long   line"
+
+will result in:
 
  "some"
  "long"
  "line"
 
-If this option is set to true,
+While if this option is set to true, the result will be:
 
  "some "
  "long "

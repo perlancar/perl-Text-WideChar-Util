@@ -137,6 +137,7 @@ sub _wrap {
     my $optfliw = _get_indent_width($is_mb, $optfli, $tw) if defined $optfli;
     my $optsli  = $opts->{slindent};
     my $optsliw = _get_indent_width($is_mb, $optsli, $tw) if defined $optsli;
+    my $optktw  = $opts->{keep_trailing_ws} // 0;
     my @res;
 
     my @para = split /(\n(?:[ \t]*\n)+)/, $text;
@@ -272,11 +273,13 @@ sub _wrap {
                             }
                             my $word2 = substr($word, length($res->[0]));
                             #say "D:truncated CJK word: $word -> $res->[0] & $res->[1], remaining=$word2";
+                            $prev_ws_after = 0;
                             $word = $word2;
                             $wordw = mbswidth($word);
                         }
 
                         # move the word to the next line
+                        push @res, " " if $prev_ws_after && $optktw;
                         push @res, "\n", $sli;
                         $y++;
 
@@ -456,10 +459,12 @@ only contains printable ASCII characters and newlines.
 
 =head2 mbwrap($text, $width, \%opts) => STR
 
-Wrap C<$text> to C<$width> columns. It uses mbswidth() instead of Perl's
-length() which works on a per-character basis. Has some support for wrapping
-Kanji/CJK (Chinese/Japanese/Korean) text which do not have whitespace between
-words.
+Wrap C<$text> to C<$width> columns. Replaces multiple whitespaces with a single
+space.
+
+It uses mbswidth() instead of Perl's length() which works on a per-character
+basis. Has some support for wrapping Kanji/CJK (Chinese/Japanese/Korean) text
+which do not have whitespace between words.
 
 Options:
 
@@ -486,6 +491,22 @@ text, or if unavailable, will default to empty string (C<"">).
 If set to true, then instead of returning the wrapped string, function will
 return C<< [$wrapped, $stats] >> where C<$stats> is a hash containing some
 information like C<max_word_width>, C<min_word_width>.
+
+=item * keep_trailing_ws => BOOL (default: 0)
+
+If set to true, then trailing whitespaces will be kept. This option is useful if
+you want to re-join the lines later. Without this option set to true, C<"some
+long line"> will be wrapped (width=4) as (quotes shown):
+
+ "some"
+ "long"
+ "line"
+
+If this option is set to true,
+
+ "some "
+ "long "
+ "line"
 
 =back
 

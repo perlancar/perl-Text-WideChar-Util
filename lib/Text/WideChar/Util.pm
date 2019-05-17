@@ -89,7 +89,8 @@ our $re_cjk = qr/(?:
                  |   \p{Block=CJK_Unified_Ideographs}
                  |   \p{Block=CJK_Unified_Ideographs_Extension_A}
                  |   \p{Block=CJK_Unified_Ideographs_Extension_B}
-                     #|   \p{Block=CJK_Unified_Ideographs_Extension_C}
+                 |   \p{Hiragana}\p{Katakana}\p{Hangul}\x{30fc}
+                #|   \p{Block=CJK_Unified_Ideographs_Extension_C}
                      [\x{3002}\x{ff0c}]
                  )/x;
 our $re_cjk_class = qr/[
@@ -103,6 +104,7 @@ our $re_cjk_class = qr/[
                            \p{Block=CJK_Unified_Ideographs}
                            \p{Block=CJK_Unified_Ideographs_Extension_A}
                            \p{Block=CJK_Unified_Ideographs_Extension_B}
+                           \p{Hiragana}\p{Katakana}\p{Hangul}\x{30fc}
                            \x{3002}
                            \x{ff0c}
                       ]/x;
@@ -117,6 +119,7 @@ our $re_cjk_negclass = qr/[^
                               \p{Block=CJK_Unified_Ideographs}
                               \p{Block=CJK_Unified_Ideographs_Extension_A}
                               \p{Block=CJK_Unified_Ideographs_Extension_B}
+                              \p{Hiragana}\p{Katakana}\p{Hangul}\x{30fc}
                               \x{3002}
                               \x{ff0c}
                       ]/x;

@@ -137,9 +137,9 @@ sub _wrap {
     my $tw = $opts->{tab_width} // 8;
     die "Please specify a positive tab width" unless $tw > 0;
     my $optfli  = $opts->{flindent};
-    my $optfliw = _get_indent_width($is_mb, $optfli, $tw) if defined $optfli;
+    my $optfliw = defined $optfli ? _get_indent_width($is_mb, $optfli, $tw) : undef;
     my $optsli  = $opts->{slindent};
-    my $optsliw = _get_indent_width($is_mb, $optsli, $tw) if defined $optsli;
+    my $optsliw = defined $optsli ? _get_indent_width($is_mb, $optsli, $tw) : undef;
     my $optkts  = $opts->{keep_trailing_space} // 0;
     my @res;
 
